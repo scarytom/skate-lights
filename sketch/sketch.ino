@@ -9,6 +9,8 @@ Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 #define LED_COUNT 10
 Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800);
 
+PinStatus previousButtonState = HIGH;
+unsigned long previousButtonChangeTime = 0;    // when did the button last change state
 
 unsigned long previousPixelChangeTime = 0;     // when did we last change a pixel
 int           pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
@@ -21,6 +23,7 @@ int           dataWriteIntervalMillis = 10000; // how many millis between data w
 
 
 void setup() {
+  pinMode(PIN_BUTTON, INPUT);
   pinMode(PIN_EXTERNAL_POWER, OUTPUT);
   digitalWrite(PIN_EXTERNAL_POWER, HIGH);
   strip.begin();
@@ -47,7 +50,20 @@ void setup() {
 }
 
 void loop() {
+  static bool buttonStateHandled = false;
   unsigned long currentTime = millis();
+
+  PinStatus buttonState = digitalRead(PIN_BUTTON);
+  if (buttonState != previousButtonState) {
+    previousButtonState = buttonState;
+    previousButtonChangeTime = currentTime;
+    buttonStateHandled = false;
+  }
+
+  if (buttonState == LOW && !buttonStateHandled && currentTime - previousButtonChangeTime > 50) {
+    buttonStateHandled = true;
+    Serial.println("button down");
+  }
 
   if (currentTime - previousPixelChangeTime > pixelChangeIntervalMillis) {
     changePixel();
@@ -97,7 +113,6 @@ void writeData() {
 #define THEATRE_GAP 4
 void applyTheatreChase() {
   static uint8_t pixelSet = 0;
-
   for(uint16_t pixelIdx = 0; pixelIdx < LED_COUNT; pixelIdx++) {
     if ((pixelIdx + pixelSet) % THEATRE_GAP != 0) {
       strip.setPixelColor(pixelIdx, strip.Color(0, 0, 0));
