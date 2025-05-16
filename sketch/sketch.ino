@@ -9,6 +9,7 @@ Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 #define LED_COUNT 10
 Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800);
 
+
 unsigned long previousPixelChangeTime = 0;    // when did we last change a pixel
 int           pixelChangeIntervalMillis = 50; // how many millis between pixel changes
 
@@ -18,8 +19,8 @@ int           dataSampleIntervalMillis = 500; // how many millis between data sa
 unsigned long previousDataWriteTime = 0;      // when did we last write data
 int           dataWriteIntervalMillis = 500;  // how many millis between data writes
 
-void setup() {
 
+void setup() {
   Serial.begin(115200);
   while (!Serial) delay(10);
 
@@ -38,7 +39,6 @@ void setup() {
 
   LittleFS.begin();
   singleFileDrive.begin("littlefsfile.csv", "Data Recorder.csv");
-
 }
 
 void changePixel() {
@@ -81,5 +81,4 @@ void loop() {
     writeData();
     previousDataWriteTime = currentTime;
   }
-
 }
