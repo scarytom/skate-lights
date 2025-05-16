@@ -9,6 +9,14 @@ Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 #define LED_COUNT 10
 Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800);
 
+unsigned long previousPixelChangeTime = 0;    // when did we last change a pixel
+int           pixelChangeIntervalMillis = 50; // how many millis between pixel changes
+
+unsigned long previousDataSampleTime = 0;     // when did we last sample data
+int           dataSampleIntervalMillis = 500; // how many millis between data samples
+
+unsigned long previousDataWriteTime = 0;      // when did we last write data
+int           dataWriteIntervalMillis = 500;  // how many millis between data writes
 
 void setup() {
 
@@ -33,15 +41,20 @@ void setup() {
 
 }
 
-void loop() {
+void changePixel() {
 
+}
+
+void sampleData() {
   sensors_event_t event;
   lis.getEvent(&event);
   Serial.print("\t\tX: "); Serial.print(event.acceleration.x);
   Serial.print(" \tY: "); Serial.print(event.acceleration.y);
   Serial.print(" \tZ: "); Serial.print(event.acceleration.z);
   Serial.println(" m/s^2 ");
+}
 
+void writeData() {
   if (okay-to-write) {
       noInterrupts();
       File f = LittleFS.open("littlefsfile.csv", "a");
@@ -49,4 +62,24 @@ void loop() {
       f.close();
       interrupts();
   }
+}
+
+void loop() {
+  unsigned long currentTime = millis();
+
+  if (currentTime - previousPixelChangeTime > pixelChangeIntervalMillis) {
+    changePixel();
+    previousPixelChangeTime = currentTime;
+  }
+
+  if (currentTime - previousDataSampleTime > dataSampleIntervalMillis) {
+    sampleData();
+    previousDataSampleTime = currentTime;
+  }
+
+  if (currentTime - previousDataWriteTime > dataWriteIntervalMillis) {
+    writeData();
+    previousDataWriteTime = currentTime;
+  }
+
 }
