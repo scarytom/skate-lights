@@ -66,8 +66,11 @@ void loop() {
 }
 
 void changePixel() {
-  pixelChangeIntervalMillis = 10;
+  pixelChangeIntervalMillis = 50;
   rainbow();
+  // solid(strip.Color(127, 0, 0));
+  applyTheatreChase();
+
   strip.show();
 }
 
@@ -88,6 +91,24 @@ void writeData() {
       f.printf("%d,%d,%d\n", 0.1, 0.2, 0.3);
       f.close();
       interrupts();
+  }
+}
+
+#define THEATRE_GAP 4
+void applyTheatreChase() {
+  static uint8_t pixelSet = 0;
+
+  for(uint16_t pixelIdx = 0; pixelIdx < LED_COUNT; pixelIdx++) {
+    if ((pixelIdx + pixelSet) % THEATRE_GAP != 0) {
+      strip.setPixelColor(pixelIdx, strip.Color(0, 0, 0));
+    }
+  }
+  pixelSet = (pixelSet + 1) % THEATRE_GAP;
+}
+
+void solid(uint32_t colour) {
+  for(uint16_t pixelIdx = 0; pixelIdx < LED_COUNT; pixelIdx++) {
+    strip.setPixelColor(pixelIdx, colour);
   }
 }
 
