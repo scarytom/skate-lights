@@ -14,12 +14,13 @@ int pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
 int dataSampleIntervalMillis = 500;  // how many millis between data samples
 int dataWriteIntervalMillis = 10000; // how many millis between data writes
 
+bool sleepMode = true;
+
 void setup() {
   pinMode(PIN_BUTTON, INPUT);
   pinMode(PIN_EXTERNAL_POWER, OUTPUT);
-  digitalWrite(PIN_EXTERNAL_POWER, HIGH);
+
   strip.begin();
-  strip.show();
   strip.setBrightness(50);
 
   Serial.begin(115200);
@@ -38,7 +39,6 @@ void setup() {
   // lis.setDataRate(LIS3DH_DATARATE_50_HZ); // 1, 20, 25, 50, 100, 200, 400, POWERDOWN, LOWPOWER_5HZ, LOWPOWER_1K6HZ
 
   LittleFS.begin();
-  singleFileDrive.begin("littlefsfile.csv", "Data Recorder.csv");
 }
 
 void loop() {
@@ -60,8 +60,10 @@ void loop() {
 
   if (buttonState == LOW && !buttonStateHandled && currentTime - previousButtonChangeTime > 50) {
     buttonStateHandled = true;
-    Serial.println("button down");
+    handleButtonPress();
   }
+
+  if (sleepMode) return;
 
   if (currentTime - previousPixelChangeTime > pixelChangeIntervalMillis) {
     changePixel();
@@ -76,6 +78,19 @@ void loop() {
   if (currentTime - previousDataWriteTime > dataWriteIntervalMillis) {
     writeData();
     previousDataWriteTime = currentTime;
+  }
+}
+
+void handleButtonPress() {
+  sleepMode = !sleepMode;
+  if (sleepMode) {
+    digitalWrite(PIN_EXTERNAL_POWER, LOW);
+
+    // allow USB in sleep mode
+    singleFileDrive.begin("littlefsfile.csv", "Data Recorder.csv");
+  } else {
+    digitalWrite(PIN_EXTERNAL_POWER, HIGH);
+    singleFileDrive.end();
   }
 }
 
