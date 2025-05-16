@@ -41,6 +41,26 @@ void setup() {
   singleFileDrive.begin("littlefsfile.csv", "Data Recorder.csv");
 }
 
+void loop() {
+  unsigned long currentTime = millis();
+
+  if (currentTime - previousPixelChangeTime > pixelChangeIntervalMillis) {
+    changePixel();
+    previousPixelChangeTime = currentTime;
+  }
+
+  if (currentTime - previousDataSampleTime > dataSampleIntervalMillis) {
+    sampleData();
+    previousDataSampleTime = currentTime;
+  }
+
+  if (currentTime - previousDataWriteTime > dataWriteIntervalMillis) {
+    writeData();
+    previousDataWriteTime = currentTime;
+  }
+}
+
+
 void changePixel() {
 
 }
@@ -61,24 +81,5 @@ void writeData() {
       f.printf("%d,%d,%d\n", data1, data2, data3);
       f.close();
       interrupts();
-  }
-}
-
-void loop() {
-  unsigned long currentTime = millis();
-
-  if (currentTime - previousPixelChangeTime > pixelChangeIntervalMillis) {
-    changePixel();
-    previousPixelChangeTime = currentTime;
-  }
-
-  if (currentTime - previousDataSampleTime > dataSampleIntervalMillis) {
-    sampleData();
-    previousDataSampleTime = currentTime;
-  }
-
-  if (currentTime - previousDataWriteTime > dataWriteIntervalMillis) {
-    writeData();
-    previousDataWriteTime = currentTime;
   }
 }
