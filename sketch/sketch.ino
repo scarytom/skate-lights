@@ -1,8 +1,7 @@
-
-
 #include <Adafruit_LIS3DH.h>
 #include <Adafruit_NeoPixel.h>
-
+#include <LittleFS.h>
+#include <SingleFileDrive.h>
 
 #define I2C_ADDRESS 0x18
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
@@ -29,12 +28,13 @@ void setup() {
   // lis.setPerformanceMode(LIS3DH_MODE_NORMAL); // LOW_POWER, NORMAL, or HIGH_RESOLUTION
   // lis.setDataRate(LIS3DH_DATARATE_50_HZ); // 1, 20, 25, 50, 100, 200, 400, POWERDOWN, LOWPOWER_5HZ, LOWPOWER_1K6HZ
 
-
-
+  LittleFS.begin();
+  singleFileDrive.begin("littlefsfile.csv", "Data Recorder.csv");
 
 }
 
 void loop() {
+
   sensors_event_t event;
   lis.getEvent(&event);
   Serial.print("\t\tX: "); Serial.print(event.acceleration.x);
@@ -42,7 +42,11 @@ void loop() {
   Serial.print(" \tZ: "); Serial.print(event.acceleration.z);
   Serial.println(" m/s^2 ");
 
-
-
-
+  if (okay-to-write) {
+      noInterrupts();
+      File f = LittleFS.open("littlefsfile.csv", "a");
+      f.printf("%d,%d,%d\n", data1, data2, data3);
+      f.close();
+      interrupts();
+  }
 }
