@@ -3,6 +3,9 @@
 #include <LittleFS.h>
 #include <SingleFileDrive.h>
 
+#define SAMPLE_FILE "samples2.csv"
+#define SAMPLE_BUFFER_SIZE 600
+
 #define I2C_ADDRESS 0x18
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 
@@ -11,10 +14,9 @@ Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800)
 
 // these might be modified during program execution
 int pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
-int dataSampleIntervalMillis = 500;  // how many millis between data samples
-int dataWriteIntervalMillis = 10000; // how many millis between data writes
+int dataSampleIntervalMillis = 100;  // how many millis between data samples
 
-bool sleepMode = true;
+bool sleepMode = false;
 
 void setup() {
   pinMode(PIN_BUTTON, INPUT);
@@ -39,6 +41,9 @@ void setup() {
   // lis.setDataRate(LIS3DH_DATARATE_50_HZ); // 1, 20, 25, 50, 100, 200, 400, POWERDOWN, LOWPOWER_5HZ, LOWPOWER_1K6HZ
 
   LittleFS.begin();
+
+  // start in sleep mode
+  toggleSleepMode();
 }
 
 void loop() {
@@ -47,7 +52,6 @@ void loop() {
   static unsigned long previousButtonChangeTime = 0; // when did the button last change state
   static unsigned long previousPixelChangeTime  = 0; // when did we last change a pixel
   static unsigned long previousDataSampleTime   = 0; // when did we last sample data
-  static unsigned long previousDataWriteTime    = 0; // when did we last write data
 
   unsigned long currentTime = millis();
 
@@ -60,7 +64,7 @@ void loop() {
 
   if (buttonState == LOW && !buttonStateHandled && currentTime - previousButtonChangeTime > 50) {
     buttonStateHandled = true;
-    handleButtonPress();
+    toggleSleepMode();
   }
 
   if (sleepMode) return;
@@ -74,22 +78,20 @@ void loop() {
     sampleData();
     previousDataSampleTime = currentTime;
   }
-
-  if (currentTime - previousDataWriteTime > dataWriteIntervalMillis) {
-    writeData();
-    previousDataWriteTime = currentTime;
-  }
 }
 
-void handleButtonPress() {
+void toggleSleepMode() {
   sleepMode = !sleepMode;
   if (sleepMode) {
     digitalWrite(PIN_EXTERNAL_POWER, LOW);
-
+  // lis.setPerformanceMode(LOW_POWER);
+  // lis.setDataRate(POWERDOWN);
     // allow USB in sleep mode
-    singleFileDrive.begin("littlefsfile.csv", "Data Recorder.csv");
+    singleFileDrive.begin(SAMPLE_FILE, "data.csv");
   } else {
     digitalWrite(PIN_EXTERNAL_POWER, HIGH);
+  // lis.setPerformanceMode(LIS3DH_MODE_NORMAL);
+  // lis.setDataRate(LIS3DH_DATARATE_50_HZ);
     singleFileDrive.end();
   }
 }
@@ -104,22 +106,27 @@ void changePixel() {
 }
 
 void sampleData() {
+  static float samples[SAMPLE_BUFFER_SIZE][3];
+  static uint16_t sampleIdx = 0;
+
   sensors_event_t event;
   lis.getEvent(&event);
-  Serial.print("\t\tX: "); Serial.print(event.acceleration.x);
-  Serial.print(" \tY: "); Serial.print(event.acceleration.y);
-  Serial.print(" \tZ: "); Serial.print(event.acceleration.z);
-  Serial.println(" m/s^2 ");
-}
+  samples[sampleIdx][0] = event.acceleration.x;
+  samples[sampleIdx][1] = event.acceleration.y;
+  samples[sampleIdx][2] = event.acceleration.z;
 
-void writeData() {
-  bool okayToWrite = true;
-  if (okayToWrite) {
-      noInterrupts();
-      File f = LittleFS.open("littlefsfile.csv", "a");
-      f.printf("%d,%d,%d\n", 0.1, 0.2, 0.3);
-      f.close();
-      interrupts();
+  sampleIdx++;
+
+  if (sampleIdx == SAMPLE_BUFFER_SIZE) {
+    Serial.println("writing data to flash");
+    sampleIdx = 0;
+    noInterrupts();
+    File f = LittleFS.open(SAMPLE_FILE, "a");
+    for(uint16_t idx = 0; idx < SAMPLE_BUFFER_SIZE; idx++) {
+      f.printf("%f,%f,%f\n", samples[idx][0], samples[idx][1], samples[idx][2]);
+    }
+    f.close();
+    interrupts();
   }
 }
 
