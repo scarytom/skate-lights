@@ -9,18 +9,10 @@ Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 #define LED_COUNT 10
 Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800);
 
-PinStatus previousButtonState = HIGH;
-unsigned long previousButtonChangeTime = 0;    // when did the button last change state
-
-unsigned long previousPixelChangeTime = 0;     // when did we last change a pixel
-int           pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
-
-unsigned long previousDataSampleTime = 0;      // when did we last sample data
-int           dataSampleIntervalMillis = 500;  // how many millis between data samples
-
-unsigned long previousDataWriteTime = 0;       // when did we last write data
-int           dataWriteIntervalMillis = 10000; // how many millis between data writes
-
+// these might be modified during program execution
+int pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
+int dataSampleIntervalMillis = 500;  // how many millis between data samples
+int dataWriteIntervalMillis = 10000; // how many millis between data writes
 
 void setup() {
   pinMode(PIN_BUTTON, INPUT);
@@ -51,6 +43,12 @@ void setup() {
 
 void loop() {
   static bool buttonStateHandled = false;
+  static PinStatus previousButtonState = HIGH;
+  static unsigned long previousButtonChangeTime = 0; // when did the button last change state
+  static unsigned long previousPixelChangeTime  = 0; // when did we last change a pixel
+  static unsigned long previousDataSampleTime   = 0; // when did we last sample data
+  static unsigned long previousDataWriteTime    = 0; // when did we last write data
+
   unsigned long currentTime = millis();
 
   PinStatus buttonState = digitalRead(PIN_BUTTON);
