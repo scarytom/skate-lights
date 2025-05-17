@@ -3,8 +3,11 @@
 #include <LittleFS.h>
 #include <SingleFileDrive.h>
 
-#define SAMPLE_FILE "samples2.csv"
+#define SAMPLE_FILE "samples3.csv"
 #define SAMPLE_BUFFER_SIZE 600
+uint8_t activeBufferIdx = 0;
+bool readyToWrite = false;
+float samples[2][SAMPLE_BUFFER_SIZE][3];
 
 #define I2C_ADDRESS 0x18
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
@@ -80,6 +83,17 @@ void loop() {
   }
 }
 
+void setup1(void) {
+
+}
+
+void loop1() {
+  if (readyToWrite) {
+    writeData();
+  }
+  delay(10000);
+}
+
 void toggleSleepMode() {
   sleepMode = !sleepMode;
   if (sleepMode) {
@@ -106,28 +120,35 @@ void changePixel() {
 }
 
 void sampleData() {
-  static float samples[SAMPLE_BUFFER_SIZE][3];
   static uint16_t sampleIdx = 0;
 
   sensors_event_t event;
   lis.getEvent(&event);
-  samples[sampleIdx][0] = event.acceleration.x;
-  samples[sampleIdx][1] = event.acceleration.y;
-  samples[sampleIdx][2] = event.acceleration.z;
+  samples[activeBufferIdx][sampleIdx][0] = event.acceleration.x;
+  samples[activeBufferIdx][sampleIdx][1] = event.acceleration.y;
+  samples[activeBufferIdx][sampleIdx][2] = event.acceleration.z;
 
   sampleIdx++;
 
   if (sampleIdx == SAMPLE_BUFFER_SIZE) {
-    Serial.println("writing data to flash");
+    Serial.println("switching sample buffer");
+    activeBufferIdx = (activeBufferIdx + 1) % 2;
     sampleIdx = 0;
-    noInterrupts();
-    File f = LittleFS.open(SAMPLE_FILE, "a");
-    for(uint16_t idx = 0; idx < SAMPLE_BUFFER_SIZE; idx++) {
-      f.printf("%f,%f,%f\n", samples[idx][0], samples[idx][1], samples[idx][2]);
-    }
-    f.close();
-    interrupts();
+    readyToWrite = true;
   }
+}
+
+void writeData() {
+  Serial.println("writing data to flash");
+  uint8_t bufferIdx = (activeBufferIdx + 1) % 2;
+  noInterrupts();
+  File f = LittleFS.open(SAMPLE_FILE, "a");
+  for(uint16_t idx = 0; idx < SAMPLE_BUFFER_SIZE; idx++) {
+    f.printf("%f,%f,%f\n", samples[bufferIdx][idx][0], samples[bufferIdx][idx][1], samples[bufferIdx][idx][2]);
+  }
+  f.close();
+  interrupts();
+  readyToWrite = false;
 }
 
 #define THEATRE_GAP 4
