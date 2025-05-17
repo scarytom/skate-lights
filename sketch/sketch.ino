@@ -20,13 +20,14 @@ int pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
 int dataSampleIntervalMillis = 100;  // how many millis between data samples
 
 bool sleepMode = false;
+#define MODE_COUNT 7;
+uint8_t mode = 0;
 
 void setup() {
   pinMode(PIN_BUTTON, INPUT);
   pinMode(PIN_EXTERNAL_POWER, OUTPUT);
 
   strip.begin();
-  strip.setBrightness(50);
 
   Serial.begin(115200);
   while (!Serial) delay(10);
@@ -45,8 +46,7 @@ void setup() {
 
   LittleFS.begin();
 
-  // start in sleep mode
-  toggleSleepMode();
+  applyMode();
 }
 
 void loop() {
@@ -67,10 +67,11 @@ void loop() {
 
   if (buttonState == LOW && !buttonStateHandled && currentTime - previousButtonChangeTime > 50) {
     buttonStateHandled = true;
-    toggleSleepMode();
+    mode = (mode + 1) % MODE_COUNT;
+    applyMode();
   }
 
-  if (sleepMode) return;
+  if (mode == 0) return;
 
   if (currentTime - previousPixelChangeTime > pixelChangeIntervalMillis) {
     changePixel();
@@ -94,19 +95,37 @@ void loop1() {
   delay(10000);
 }
 
-void toggleSleepMode() {
-  sleepMode = !sleepMode;
-  if (sleepMode) {
+void applyMode() {
+  Serial.printf("entering mode %d\n", mode);
+  if (mode == 0) {
     digitalWrite(PIN_EXTERNAL_POWER, LOW);
+    strip.setBrightness(0);
   // lis.setPerformanceMode(LOW_POWER);
   // lis.setDataRate(POWERDOWN);
     // allow USB in sleep mode
     singleFileDrive.begin(SAMPLE_FILE, "data.csv");
-  } else {
+  }
+  if (mode == 1) {
+    strip.setBrightness(64);
     digitalWrite(PIN_EXTERNAL_POWER, HIGH);
   // lis.setPerformanceMode(LIS3DH_MODE_NORMAL);
   // lis.setDataRate(LIS3DH_DATARATE_50_HZ);
     singleFileDrive.end();
+  }
+  if (mode == 2) {
+    strip.setBrightness(128);
+  }
+  if (mode == 3) {
+    strip.setBrightness(255);
+  }
+  if (mode == 4) {
+    strip.setBrightness(64);
+  }
+  if (mode == 5) {
+    strip.setBrightness(128);
+  }
+  if (mode == 6) {
+    strip.setBrightness(255);
   }
 }
 
@@ -114,8 +133,10 @@ void changePixel() {
   pixelChangeIntervalMillis = 50;
   rainbow();
   // solid(strip.Color(127, 0, 0));
-  applyTheatreChase();
 
+  if (mode < 4) {
+    applyTheatreChase();
+  }
   strip.show();
 }
 
