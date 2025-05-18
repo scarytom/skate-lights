@@ -3,7 +3,7 @@
 #include <LittleFS.h>
 #include <SingleFileDrive.h>
 
-#define SAMPLE_FILE "samples3.csv"
+#define SAMPLE_FILE "samples4.csv"
 #define SAMPLE_BUFFER_SIZE 600
 uint8_t activeBufferIdx = 0;
 bool readyToWrite = false;
@@ -30,7 +30,7 @@ void setup() {
   strip.begin();
 
   Serial.begin(115200);
-  while (!Serial) delay(10);
+  // while (!Serial) delay(10);
 
   Serial.println("start");
 
