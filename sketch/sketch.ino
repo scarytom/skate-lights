@@ -3,7 +3,7 @@
 #include <LittleFS.h>
 #include <SingleFileDrive.h>
 
-#define SAMPLE_FILE "samples4.csv"
+#define SAMPLE_FILE "samples5.csv"
 #define SAMPLE_BUFFER_SIZE 600
 uint8_t activeBufferIdx = 0;
 bool readyToWrite = false;
@@ -12,7 +12,7 @@ float samples[2][SAMPLE_BUFFER_SIZE][3];
 #define I2C_ADDRESS 0x18
 Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 
-#define LED_COUNT 10
+#define LED_COUNT 18
 Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800);
 
 // these might be modified during program execution
