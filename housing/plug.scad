@@ -34,7 +34,10 @@ c4 = [28, 15];
 c5 = [39, 10.5];
 c6 = [50, 4];
 
-linear_extrude(21)
+plate_thickness = 21;
+lightrail_depth = 4;
+
+linear_extrude(plate_thickness / 2 + lightrail_depth)
 difference() {
     // wedge
     offset(r=0.5) {
@@ -47,6 +50,14 @@ difference() {
             bezier([29, 15], c5, c6, [64, 0])
         ));
     }
+    
+    // wire slot
+    translate([11.5, 14])
+    circle(2.5);
+    
+    // peg slot
+    translate([48.5, 2.5])
+    circle(1);
     
     // battery slot
     translate([18, 13.5])
@@ -78,6 +89,59 @@ difference() {
     }
     //*/
 }
+
+// light rail (lr)
+lr_drop = 5.5;
+lr_height = 14;
+lightrail = [[-20, -lr_drop],
+             [-20, -(lr_drop + lr_height)],
+             [110, -(lr_drop + lr_height)],
+             [110, -lr_drop]];
+
+linear_extrude(lightrail_depth) {
+    offset(r=0.5)
+    polygon(concat([[5, 0.4], [5, -lr_drop]],
+                   , lightrail,
+                   [[58, -lr_drop], [58, 0.4]]));
+
+    // fillets
+    difference() {
+        translate([4, -0.51])
+        square(0.5);
+        translate([4.01, -0.52])
+        circle(0.5);
+    }
+    difference() {
+        translate([4, 0.49-lr_drop])
+        square(0.5);
+        translate([4.01, 0.99-lr_drop])
+        circle(0.5);
+    }
+    difference() {
+        translate([58.5, -0.51])
+        square(0.5);
+        translate([58.99, -0.52])
+        circle(0.5);
+    }
+    difference() {
+        translate([58.5, 0.49-lr_drop])
+        square(0.5);
+        translate([58.99, 0.99-lr_drop])
+        circle(0.5);
+    }
+}
+
+stub_height = 0.5;
+translate([-13, -(lr_drop + 3)])
+cylinder(lightrail_depth + stub_height, 3, 3);
+translate([45, -(lr_drop + 3)])
+cylinder(lightrail_depth + stub_height, 3, 3);
+translate([103, -(lr_drop + 3)])
+cylinder(lightrail_depth + stub_height, 3, 3);
+//linear_extrude(8)
+//offset(r=0.5)
+//polygon(lightrail);
+
 
 /*
 // guide
