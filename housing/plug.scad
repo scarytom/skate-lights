@@ -34,10 +34,14 @@ c4 = [28, 15];
 c5 = [39, 10.5];
 c6 = [50, 4];
 
-plate_thickness = 21;
+plate_width = 21;
+plate_lip_width = 0.5;
 lightrail_depth = 4;
+stud_height = 9;
 
-linear_extrude(plate_thickness / 2 + lightrail_depth)
+wedge_height = plate_width / 2 + lightrail_depth + stud_height - plate_lip_width;
+
+linear_extrude(wedge_height)
 difference() {
     // wedge
     offset(r=0.5) {
@@ -55,9 +59,13 @@ difference() {
     translate([11.5, 14])
     circle(2.5);
     
-    // peg slot
+    // peg slot 1
     translate([48.5, 2.5])
-    circle(1);
+    circle(1.3);
+    
+    // peg slot 2
+    translate([31.2, 3.2])
+    circle(1.3);
     
     // battery slot
     translate([18, 13.5])
@@ -91,7 +99,7 @@ difference() {
 }
 
 // light rail (lr)
-lr_drop = 5.5;
+lr_drop = 3.5;
 lr_height = 14;
 lightrail = [[-20, -lr_drop],
              [-20, -(lr_drop + lr_height)],
@@ -100,44 +108,45 @@ lightrail = [[-20, -lr_drop],
 
 linear_extrude(lightrail_depth) {
     offset(r=0.5)
-    polygon(concat([[5, 0.4], [5, -lr_drop]],
+    polygon(concat([[0.47, 0.4], [0.47, -lr_drop]],
                    , lightrail,
-                   [[58, -lr_drop], [58, 0.4]]));
+                   [[60.63, -lr_drop], [60.63, 0.4]]));
 
     // fillets
+//    difference() {
+//        translate([4, -0.51])
+//        square(0.5);
+//        translate([4.01, -0.52])
+//        circle(0.5);
+//    }
     difference() {
-        translate([4, -0.51])
+        translate([-0.53, 0.49-lr_drop])
         square(0.5);
-        translate([4.01, -0.52])
+        translate([-0.52, 0.99-lr_drop])
         circle(0.5);
     }
+//    difference() {
+//        translate([58.5, -0.51])
+//        square(0.5);
+//        translate([58.99, -0.52])
+//        circle(0.5);
+//    }
     difference() {
-        translate([4, 0.49-lr_drop])
+        translate([61.13, 0.49-lr_drop])
         square(0.5);
-        translate([4.01, 0.99-lr_drop])
-        circle(0.5);
-    }
-    difference() {
-        translate([58.5, -0.51])
-        square(0.5);
-        translate([58.99, -0.52])
-        circle(0.5);
-    }
-    difference() {
-        translate([58.5, 0.49-lr_drop])
-        square(0.5);
-        translate([58.99, 0.99-lr_drop])
+        translate([61.62, 0.99-lr_drop])
         circle(0.5);
     }
 }
 
-stub_height = 0.5;
-translate([-13, -(lr_drop + 3)])
-cylinder(lightrail_depth + stub_height, 3, 3);
-translate([45, -(lr_drop + 3)])
-cylinder(lightrail_depth + stub_height, 3, 3);
-translate([103, -(lr_drop + 3)])
-cylinder(lightrail_depth + stub_height, 3, 3);
+
+stud_inset_top = 3;
+translate([-5, -(lr_drop + 5)])
+cylinder(lightrail_depth + stud_height, stud_inset_top, 3);
+translate([45, -(lr_drop + 5)])
+cylinder(lightrail_depth + stud_height, stud_inset_top, 3);
+translate([95, -(lr_drop + 5)])
+cylinder(lightrail_depth + stud_height, stud_inset_top, 3);
 //linear_extrude(8)
 //offset(r=0.5)
 //polygon(lightrail);
