@@ -41,6 +41,8 @@ stud_height = 9;
 
 wedge_height = plate_width / 2 + lightrail_depth + stud_height - plate_lip_width;
 
+//mirror()
+{
 linear_extrude(wedge_height)
 difference() {
     // wedge
@@ -150,7 +152,7 @@ cylinder(lightrail_depth + stud_height, stud_inset_top, 3);
 //linear_extrude(8)
 //offset(r=0.5)
 //polygon(lightrail);
-
+}
 
 /*
 // guide
