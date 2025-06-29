@@ -13,8 +13,8 @@ function bezier(p1, p2, p3, p4, steps = 50) =
       bezier_point(p1[1], p2[1], p3[1], p4[1], step / steps)]];
 
 
-lightrail_depth = 4;
-stud_height = 9;
+lightrail_depth = 3;
+stud_height = 1;
 
 module wedge() {
     plate_width = 21;
@@ -53,14 +53,14 @@ module wedge() {
         circle(1.3);
         
         // peg slot 2
-        translate([31.2, 3.2])
+        translate([31.2, 2.5])
         circle(1.3);
         
         // battery slot
-        translate([18, 13.5])
-        rotate(-24)
+        translate([17, 13.95])
+        rotate(-25)
         offset(r=1) 
-        square([28, 3]);
+        square([28, 3.1]);
         
         // board slot
         translate([5, 2.5]) 
@@ -69,19 +69,19 @@ module wedge() {
         
         // fillet #1
         difference() {
-            translate([27.75, 7.54])
+            translate([27.75, 7.30])
             rotate(-12)
             square(0.6);
-            translate([28.3, 7.49])
+            translate([28.3, 7.25])
             circle(0.301);
         }
         
         // fillet #2
         difference() {
-            translate([23.1, 9.45])
+            translate([22.8, 9.45])
             rotate(-12)
             square([1.5, 0.7]);
-            translate([23.1, 9.80])
+            translate([22.82, 9.8])
             circle(0.305);
         }
     }
@@ -143,8 +143,8 @@ module wedge() {
 
 module light_rail() {
     // light rail (lr)
-    lr_drop = 3.5;
-    lr_height = 14;
+    lr_drop = 9.5;
+    lr_height = 13;
     lightrail = [[-20, -lr_drop],
                  [-20, -(lr_drop + lr_height)],
                  [110, -(lr_drop + lr_height)],
@@ -152,21 +152,33 @@ module light_rail() {
 
     linear_extrude(lightrail_depth) {
         offset(r=0.5)
-        polygon(concat([[0.47, 0.4], [0.47, -lr_drop]],
+        polygon(concat([[5, 0.4], [5, -lr_drop]],
                        , lightrail,
-                       [[60.63, -lr_drop], [60.63, 0.4]]));
+                       [[58, -lr_drop], [58, 0.4]]));
 
         // fillets
         difference() {
-            translate([-0.53, 0.49-lr_drop])
+            translate([4, -0.51])
             square(0.5);
-            translate([-0.52, 0.99-lr_drop])
+            translate([4.01, -0.52])
             circle(0.5);
         }
         difference() {
-            translate([61.13, 0.49-lr_drop])
+            translate([4, 0.49-lr_drop])
             square(0.5);
-            translate([61.62, 0.99-lr_drop])
+            translate([4.01, 0.99-lr_drop])
+            circle(0.5);
+        }
+        difference() {
+            translate([58.5, -0.51])
+            square(0.5);
+            translate([58.99, -0.52])
+            circle(0.5);
+        }
+        difference() {
+            translate([58.5, 0.49-lr_drop])
+            square(0.5);
+            translate([58.99, 0.99-lr_drop])
             circle(0.5);
         }
     }
