@@ -60,7 +60,7 @@ module wedge() {
         translate([17, 13.95])
         rotate(-25)
         offset(r=1) 
-        square([28, 3.1]);
+        square([28.5, 3.1]);
         
         // board slot
         translate([5, 2.5]) 
