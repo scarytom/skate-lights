@@ -53,37 +53,25 @@ module wedge() {
         circle(1.3);
         
         // peg slot 2
-        translate([31.2, 2.5])
-        circle(1.3);
+        //translate([31.2, 2.5])
+        //circle(1.3);
         
         // battery slot
         translate([17, 13.95])
         rotate(-25)
         offset(r=1) 
-        square([28.5, 3.1]);
+        square([28.5, 3.15]);
         
         // board slot
-        translate([5, 2.5]) 
-        offset(r=1)
-        square([22, 6]);
-        
-        // fillet #1
-        difference() {
-            translate([27.75, 7.30])
-            rotate(-12)
-            square(0.6);
-            translate([28.3, 7.25])
-            circle(0.301);
-        }
-        
-        // fillet #2
-        difference() {
-            translate([22.8, 9.45])
-            rotate(-12)
-            square([1.5, 0.7]);
-            translate([22.82, 9.8])
-            circle(0.305);
-        }
+        translate([8, 2])
+        offset(r=0.5)
+        square([19, 4]);
+        translate([8, 2])
+        offset(r=0.5)
+        square([10, 6.2]);
+        translate([27, 2.0])
+        offset(r=0.5)
+        square([3, 0.65]);
     }
     
     /*
@@ -198,6 +186,6 @@ module plug() {
     light_rail();
 }
 
+//mirror([1, 0, 0])
 plug();
-//mirror([1, 0, 0]) plug();
   
