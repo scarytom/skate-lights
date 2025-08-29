@@ -19,6 +19,8 @@ Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800)
 int pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
 int dataSampleIntervalMillis = 100;  // how many millis between data samples
 
+float average_acceleration = 0.0;
+
 bool sleepMode = false;
 #define MODE_COUNT 7;
 uint8_t mode = 0;
@@ -81,6 +83,18 @@ void loop() {
   if (currentTime - previousDataSampleTime > dataSampleIntervalMillis) {
     sampleData();
     previousDataSampleTime = currentTime;
+
+    if (average_acceleration > 6.0) {
+      pixelChangeIntervalMillis = 25;
+    } else if (average_acceleration > 4.0) {
+      pixelChangeIntervalMillis = 50;
+    } else if (average_acceleration > 2.0) {
+      pixelChangeIntervalMillis = 75;
+    } else  if (average_acceleration > 1.0) {
+      pixelChangeIntervalMillis = 100;
+    } else {
+      pixelChangeIntervalMillis = 250;
+    }
   }
 }
 
@@ -130,7 +144,6 @@ void applyMode() {
 }
 
 void changePixel() {
-  pixelChangeIntervalMillis = 50;
   rainbow();
   // solid(strip.Color(127, 0, 0));
 
@@ -157,6 +170,24 @@ void sampleData() {
     sampleIdx = 0;
     readyToWrite = true;
   }
+
+  updateRollingAverage(event.acceleration.x, event.acceleration.y, event.acceleration.z);
+}
+
+void updateRollingAverage(float x, float y, float z) {
+  static uint8_t idx = 0;
+  static float buffer[10];
+
+  float in_magnitude = abs(sqrt(x * x + y * y + z * z) - 9.81);
+  float out_magnitude = buffer[idx];
+  buffer[idx] = in_magnitude;
+
+  idx++;
+  if (idx == 10) {
+    idx = 0;
+  }
+
+  average_acceleration = (average_acceleration * 10.0 - out_magnitude + in_magnitude) / 10.0;
 }
 
 void writeData() {
