@@ -180,9 +180,11 @@ void applyTheatreChase() {
       strip.setPixelColor(pixelIdx, strip.Color(0, 0, 0));
     }
   }
-  pixelSet = pixelSet - 1;
-  if (pixelSet < 0) {
+
+  if (pixelSet == 0) {
     pixelSet = THEATRE_GAP - 1;
+  } else {
+    pixelSet = pixelSet - 1;
   }
 }
 
@@ -201,9 +203,10 @@ void rainbow() {
     strip.setPixelColor(pixelIdx, calculateRainbowColour(pixelIdx * RAINBOW_STEP + cyclePosition));
   }
 
-  cyclePosition = cyclePosition - RAINBOW_STEP;
-  if (cyclePosition < 0) {
-    cyclePosition = RAINBOW_STATES - 1;
+  if (cyclePosition < RAINBOW_STEP) {
+    cyclePosition = RAINBOW_STATES - RAINBOW_STEP;
+  } else {
+    cyclePosition = cyclePosition - RAINBOW_STEP;
   }
 }
 
