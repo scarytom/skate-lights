@@ -3,7 +3,7 @@
 #include <LittleFS.h>
 #include <SingleFileDrive.h>
 
-#define SAMPLE_FILE "samples5.csv"
+#define SAMPLE_FILE "samples6.csv"
 #define SAMPLE_BUFFER_SIZE 600
 uint8_t activeBufferIdx = 0;
 bool readyToWrite = false;
@@ -180,7 +180,10 @@ void applyTheatreChase() {
       strip.setPixelColor(pixelIdx, strip.Color(0, 0, 0));
     }
   }
-  pixelSet = (pixelSet + 1) % THEATRE_GAP;
+  pixelSet = pixelSet - 1;
+  if (pixelSet < 0) {
+    pixelSet = THEATRE_GAP - 1;
+  }
 }
 
 void solid(uint32_t colour) {
@@ -198,7 +201,10 @@ void rainbow() {
     strip.setPixelColor(pixelIdx, calculateRainbowColour(pixelIdx * RAINBOW_STEP + cyclePosition));
   }
 
-  cyclePosition = (cyclePosition + RAINBOW_STEP) % RAINBOW_STATES;
+  cyclePosition = cyclePosition - RAINBOW_STEP;
+  if (cyclePosition < 0) {
+    cyclePosition = RAINBOW_STATES - 1;
+  }
 }
 
 uint32_t calculateRainbowColour(uint16_t position) {
