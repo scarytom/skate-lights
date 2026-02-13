@@ -12,12 +12,23 @@ function bezier(p1, p2, p3, p4, steps = 50) =
      [bezier_point(p1[0], p2[0], p3[0], p4[0], step / steps),
       bezier_point(p1[1], p2[1], p3[1], p4[1], step / steps)]];
 
+module convex_fillet(size = 4, rotation = 45, x = 1, practice = false) {
+    difference() {
+        if (!practice) {
+            rotate([0, 0, rotation])           
+            translate([size, size])
+            circle(size * x);
+        }
+        circle(size);
+    }
+}
 
 lightrail_depth = 3;
 stud_height = 1;
 
+
 module wedge() {
-    plate_width = 21;
+    plate_width = 4;
     plate_lip_width = 0.5;
     wedge_height = plate_width / 2 + lightrail_depth + stud_height - plate_lip_width;
     
@@ -30,49 +41,66 @@ module wedge() {
     c5 = [39, 10.5];
     c6 = [50, 4];
 
-    linear_extrude(wedge_height)
     difference() {
-        // wedge
-        offset(r=0.5) {
-            scale([0.94,0.94])
-            translate([0.5,0.5])
-            polygon(concat(
-                bezier([0, 0], c1, c2, [15.2, 19.9]),
-                bezier([15.2, 19.9], c3, c4, [29, 15]),
-           //     [[30, 40], [29, 40]],
-                bezier([29, 15], c5, c6, [64, 0])
-            ));
+        linear_extrude(wedge_height)
+        difference() {
+            // wedge
+            offset(r=0.5) {
+                scale([0.94,0.94])
+                translate([0.5,0.5])
+                polygon(concat(
+                    bezier([0, 0], c1, c2, [15.2, 19.9]),
+                    bezier([15.2, 19.9], c3, c4, [29, 15]),
+               //     [[30, 40], [29, 40]],
+                    bezier([29, 15], c5, c6, [64, 0])
+                ));
+            }
+            
+            // coupling slot
+            translate([20.6, 5.5])
+            circle(1.5);
+        
+            // battery slot
+            translate([10, 12.8])
+            rotate(-16.5)
+            offset(r=1) 
+            square([28.5, 3.15]);
+        
+            // wires slot
+            translate([44, 2.65])
+            offset(r=0.5)
+            square([4, 1]);
+            
+            // battery connector slot
+            translate([9, 2.65])
+            offset(r=0.5)
+            square([7.5, 6]);
         }
         
-        // wire slot
-        translate([11.5, 14])
-        circle(2.5);
-        
-        // peg slot 1
-        translate([48.5, 2.5])
-        circle(1.3);
-        
-        // peg slot 2
-        //translate([31.2, 2.5])
-        //circle(1.3);
-        
-        // battery slot
-        translate([17, 13.95])
-        rotate(-25)
-        offset(r=1) 
-        square([28.5, 3.15]);
-        
-        // board slot
-        translate([8, 2])
+        // board slot, which doesn't go all the way through
+        translate([2.2, 1.5, 1.5])
+        linear_extrude(wedge_height)
         offset(r=0.5)
-        square([19, 4]);
-        translate([8, 2])
-        offset(r=0.5)
-        square([10, 6.2]);
-        translate([27, 2.0])
-        offset(r=0.5)
-        square([3, 0.65]);
+        square([51, 0.65]);
+        
+        // wires slot fillets
+        translate([43, 3.15, 1.5])
+        linear_extrude(wedge_height)
+        convex_fillet(size=0.5, rotation=-90, practice=false);
+        translate([43 + 4 + 2, 3.15, 1.5])
+        linear_extrude(wedge_height)
+        convex_fillet(size=0.5, rotation=180, practice=false);
+        
+        // battery connector slot fillets
+        translate([8, 3.15, 1.5])
+        linear_extrude(wedge_height)
+        convex_fillet(size=0.5, rotation=-90, practice=false);
+        translate([8 + 7.5 + 2, 3.15, 1.5])
+        linear_extrude(wedge_height)
+        convex_fillet(size=0.5, rotation=180, practice=false);
     }
+    
+
     
     /*
     // guide
@@ -130,20 +158,14 @@ module wedge() {
 
 
 module light_rail() {
-    // light rail (lr)
     lr_drop = 9.5;
     lr_height = 13;
-    lightrail = [[-20, -lr_drop],
-                 [-20, -(lr_drop + lr_height)],
-                 [110, -(lr_drop + lr_height)],
-                 [110, -lr_drop]];
-
+    
+    // drop bar
     linear_extrude(lightrail_depth) {
-        offset(r=0.5)
-        polygon(concat([[5, 0.4], [5, -lr_drop]],
-                       , lightrail,
-                       [[58, -lr_drop], [58, 0.4]]));
-
+        translate([4.5, 0.4 - lr_drop])
+        square([54, lr_drop]);
+        
         // fillets
         difference() {
             translate([4, -0.51])
@@ -171,14 +193,60 @@ module light_rail() {
         }
     }
 
+        
+    // rail
+    difference() {
+        linear_extrude(lightrail_depth + stud_height)
+        translate([-20, -lr_drop -lr_height])
+        offset(r=0.5)
+        square([128, lr_height]);
 
-    stud_inset_top = 3;
-    translate([-5, -(lr_drop + 5)])
-    cylinder(lightrail_depth + stud_height, stud_inset_top, 3);
-    translate([45, -(lr_drop + 5)])
-    cylinder(lightrail_depth + stud_height, stud_inset_top, 3);
-    translate([95, -(lr_drop + 5)])
-    cylinder(lightrail_depth + stud_height, stud_inset_top, 3);
+        // create a slot for the led strip to go in
+        translate([-19, -(lr_drop + lr_height / 2 + 5.6), 0.5])
+        linear_extrude(2.1)
+        offset(r=0.5)
+        square([126, 11.2]);
+       
+        // and a slot at the end to post the lights in and let wires out       
+        translate([-21, -(lr_drop + lr_height / 2 + 5.5), 2.5])
+        linear_extrude(10)
+        offset(r=0.5)
+        square([5.6, 11]);
+        // with its fillets
+        translate([-20.2, -(lr_drop + lr_height / 2 + 6.3), 2.5])
+        linear_extrude(10)
+        convex_fillet(size=0.3, rotation=90, practice=false);
+        translate([-20.2, -(lr_drop + 0.2), 2.5])
+        linear_extrude(10)
+        convex_fillet(size=0.3, rotation=180, practice=false);    
+        translate([-14.532, -(lr_drop + 0.505), 2.5])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=190, x = 0.7, practice=false);   
+        translate([-14.532, -(lr_drop + lr_height - 0.505), 2.5])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=80, x = 0.7, practice=false);    
+        
+        // and some windows for the lights
+        for(position = [-14.5 : 6.93 : 105])
+        translate([position, -lr_drop -lr_height/2, -0.1])
+        cylinder(h=1, r=2.5);
+        
+        // chop out some bits so we don't need to bridge too much
+        for(position = [-16.57 : 20.79 : 87.38])
+        translate([position, -lr_drop -lr_height + 1.5, 2.5])
+        linear_extrude(10)
+        offset(r=0.5)
+        square([18, lr_height - 3]);
+    }
+//        color("red")
+//        translate([-14.532, -(lr_drop + 0.505), 2.5])
+//        linear_extrude(10)
+//        convex_fillet(size=0.5, rotation=190, x = 0.7, practice=false);   
+//        color("red")
+//        translate([-14.532, -(lr_drop + lr_height - 0.505), 2.5])
+//        linear_extrude(10)
+//        convex_fillet(size=0.5, rotation=80, x = 0.7, practice=false);   
+
 }
 
 module plug() {
@@ -186,6 +254,6 @@ module plug() {
     light_rail();
 }
 
-//mirror([1, 0, 0])
+mirror([1, 0, 0])
 plug();
   
