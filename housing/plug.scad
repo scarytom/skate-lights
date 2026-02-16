@@ -58,14 +58,14 @@ module wedge() {
             
             // coupling slot
             translate([20.6, 5.5])
-            circle(1.5);
+            circle(1.75);
         
             // battery slot
             translate([10, 12.8])
             rotate(-16.5)
             offset(r=1) 
             square([28.5, 3.15]);
-        
+            
             // wires slot
             translate([44, 2.65])
             offset(r=0.5)
@@ -82,6 +82,11 @@ module wedge() {
         linear_extrude(wedge_height)
         offset(r=0.5)
         square([51, 0.65]);
+        // little chip next to battery connector slot
+        translate([7, 2.65, 1.5])
+        linear_extrude(wedge_height)
+        offset(r=0.5)
+        square([1.5, 0.5]);
         
         // wires slot fillets
         translate([43, 3.15, 1.5])
@@ -92,7 +97,10 @@ module wedge() {
         convex_fillet(size=0.5, rotation=180, practice=false);
         
         // battery connector slot fillets
-        translate([8, 3.15, 1.5])
+        translate([8 - 2, 3.15, 1.5])
+        linear_extrude(wedge_height)
+        convex_fillet(size=0.5, rotation=-90, practice=false);
+        translate([8, 4.15, 1.5])
         linear_extrude(wedge_height)
         convex_fillet(size=0.5, rotation=-90, practice=false);
         translate([8 + 7.5 + 2, 3.15, 1.5])
@@ -211,7 +219,7 @@ module light_rail() {
         translate([-21, -(lr_drop + lr_height / 2 + 5.5), 2.5])
         linear_extrude(10)
         offset(r=0.5)
-        square([5.6, 11]);
+        square([9, 11]);
         // with its fillets
         translate([-20.2, -(lr_drop + lr_height / 2 + 6.3), 2.5])
         linear_extrude(10)
@@ -219,10 +227,10 @@ module light_rail() {
         translate([-20.2, -(lr_drop + 0.2), 2.5])
         linear_extrude(10)
         convex_fillet(size=0.3, rotation=180, practice=false);    
-        translate([-14.532, -(lr_drop + 0.505), 2.5])
+        translate([-11.132, -(lr_drop + 0.505), 2.5])
         linear_extrude(10)
         convex_fillet(size=0.5, rotation=190, x = 0.7, practice=false);   
-        translate([-14.532, -(lr_drop + lr_height - 0.505), 2.5])
+        translate([-11.132, -(lr_drop + lr_height - 0.505), 2.5])
         linear_extrude(10)
         convex_fillet(size=0.5, rotation=80, x = 0.7, practice=false);    
         
