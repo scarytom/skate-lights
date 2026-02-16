@@ -201,6 +201,12 @@ module light_rail() {
         }
     }
 
+    //stilts
+    for(position = [-7.96 : 20.79 : 95.99])
+    translate([position, -lr_drop -lr_height/2, 0])
+    linear_extrude(2.5)
+    offset(0.5)
+    square([0.79, 0.1]);
         
     // rail
     difference() {
