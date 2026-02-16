@@ -240,11 +240,15 @@ module light_rail() {
         cylinder(h=1, r=2.5);
         
         // chop out some bits so we don't need to bridge too much
-        for(position = [-16.57 : 20.79 : 87.38])
+        for(position = [-26.96 : 20.79 : 76.99])
         translate([position, -lr_drop -lr_height + 1.5, 2.5])
         linear_extrude(10)
         offset(r=0.5)
         square([18, lr_height - 3]);
+        translate([97.78, -lr_drop -lr_height + 1.5, 2.5])
+        linear_extrude(10)
+        offset(r=0.5)
+        square([8, lr_height - 3]);
     }
 //        color("red")
 //        translate([-14.532, -(lr_drop + 0.505), 2.5])
