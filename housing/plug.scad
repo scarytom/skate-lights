@@ -28,9 +28,13 @@ stud_height = 1;
 
 
 module wedge() {
-    plate_width = 4;
+    plate_width = 3.5;
     plate_lip_width = 0.5;
     wedge_height = plate_width / 2 + lightrail_depth + stud_height - plate_lip_width;
+    board_chopout_z = 2.0;
+    battery_connector_slot_x = 9.2;
+    wires_slot_x = 42;
+    wires_slot_width = 6;
     
     c1 = [2.5, 15.5];
     c2 = [11, 19.5];
@@ -58,52 +62,65 @@ module wedge() {
             
             // coupling slot
             translate([20.6, 5.5])
-            circle(1.75);
+            circle(1.5);
         
             // battery slot
-            translate([10, 12.8])
-            rotate(-16.5)
+            translate([10, 12.8]) // ->9.5
+            rotate(-16.5)         // ->16
             offset(r=1) 
             square([28.5, 3.15]);
             
             // wires slot
-            translate([44, 2.65])
+            translate([wires_slot_x, 2.65])
             offset(r=0.5)
-            square([4, 1]);
+            square([wires_slot_width, 1]);
             
             // battery connector slot
-            translate([9, 2.65])
+            translate([battery_connector_slot_x, 2.65])
             offset(r=0.5)
-            square([7.5, 6]);
+            square([7.5, 5.5]);
         }
         
         // board slot, which doesn't go all the way through
-        translate([2.2, 1.5, 1.5])
+        translate([2.2, 1.5, board_chopout_z])
         linear_extrude(wedge_height)
         offset(r=0.5)
         square([51, 0.65]);
         // little chip next to battery connector slot
-        translate([7, 2.65, 1.5])
+        translate([battery_connector_slot_x - 2, 2.65, board_chopout_z])
         linear_extrude(wedge_height)
         offset(r=0.5)
         square([1.5, 0.5]);
+        // slim chip midway along board on battery connector side
+        translate([27, 2.65, board_chopout_z])
+        linear_extrude(wedge_height)
+        offset(r=0.5)
+        square([5, 0.2]);
         
         // wires slot fillets
-        translate([43, 3.15, 1.5])
+        translate([wires_slot_x - 1, 3.15, board_chopout_z])
         linear_extrude(wedge_height)
         convex_fillet(size=0.5, rotation=-90, practice=false);
-        translate([43 + 4 + 2, 3.15, 1.5])
+        translate([wires_slot_x - 1 + wires_slot_width + 2, 3.15, board_chopout_z])
         linear_extrude(wedge_height)
         convex_fillet(size=0.5, rotation=180, practice=false);
         
+        // slim chip midway fillets
+        translate([27 - 1 + 0.21, 2.95, board_chopout_z])
+        linear_extrude(wedge_height)
+        convex_fillet(size=0.3, rotation=-90, practice=false);
+        translate([27 - 1 + 5 + 1.79, 2.95, board_chopout_z])
+        linear_extrude(wedge_height)
+        convex_fillet(size=0.3, rotation=180, practice=false);
+        
         // battery connector slot fillets
-        translate([8 - 2, 3.15, 1.5])
+        translate([battery_connector_slot_x - 1 - 2, 3.15, board_chopout_z])
         linear_extrude(wedge_height)
         convex_fillet(size=0.5, rotation=-90, practice=false);
-        translate([8, 4.15, 1.5])
+        translate([battery_connector_slot_x - 1, 4.15, board_chopout_z])
         linear_extrude(wedge_height)
         convex_fillet(size=0.5, rotation=-90, practice=false);
-        translate([8 + 7.5 + 2, 3.15, 1.5])
+        translate([battery_connector_slot_x - 1 + 7.5 + 2, 3.15, board_chopout_z])
         linear_extrude(wedge_height)
         convex_fillet(size=0.5, rotation=180, practice=false);
     }
@@ -201,10 +218,13 @@ module light_rail() {
         }
     }
 
+    front_thickness = 0.5;
+    led_strip_thickness = 2.1;
+
     //stilts
     for(position = [-7.96 : 20.79 : 95.99])
     translate([position, -lr_drop -lr_height/2, 0])
-    linear_extrude(2.5)
+    linear_extrude(front_thickness + led_strip_thickness - 0.1)
     offset(0.5)
     square([0.79, 0.1]);
         
@@ -216,8 +236,8 @@ module light_rail() {
         square([128, lr_height]);
 
         // create a slot for the led strip to go in
-        translate([-19, -(lr_drop + lr_height / 2 + 5.6), 0.5])
-        linear_extrude(2.1)
+        translate([-19, -(lr_drop + lr_height / 2 + 5.6), front_thickness])
+        linear_extrude(led_strip_thickness)
         offset(r=0.5)
         square([126, 11.2]);
        
@@ -256,14 +276,6 @@ module light_rail() {
         offset(r=0.5)
         square([8, lr_height - 3]);
     }
-//        color("red")
-//        translate([-14.532, -(lr_drop + 0.505), 2.5])
-//        linear_extrude(10)
-//        convex_fillet(size=0.5, rotation=190, x = 0.7, practice=false);   
-//        color("red")
-//        translate([-14.532, -(lr_drop + lr_height - 0.505), 2.5])
-//        linear_extrude(10)
-//        convex_fillet(size=0.5, rotation=80, x = 0.7, practice=false);   
 
 }
 
