@@ -274,7 +274,7 @@ module light_rail() {
         translate([97.78, -lr_drop -lr_height + 1.5, 2.5])
         linear_extrude(10)
         offset(r=0.5)
-        square([8, lr_height - 3]);
+        square([8.5, lr_height - 3]);
     }
 
 }
