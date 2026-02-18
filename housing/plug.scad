@@ -187,34 +187,44 @@ module light_rail() {
     lr_height = 13;
     
     // drop bar
-    linear_extrude(lightrail_depth) {
-        translate([4.5, 0.4 - lr_drop])
-        square([54, lr_drop]);
+    difference() {
+        linear_extrude(lightrail_depth) {
+            translate([4.5, 0.4 - lr_drop])
+            square([54, lr_drop]);
         
-        // fillets
-        difference() {
-            translate([4, -0.51])
-            square(0.5);
-            translate([4.01, -0.52])
-            circle(0.5);
+            // fillets
+            difference() {
+                translate([4, -0.51])
+                square(0.5);
+                translate([4.01, -0.52])
+                circle(0.5);
+            }
+            difference() {
+                translate([4, 0.49-lr_drop])
+                square(0.5);
+                translate([4.01, 0.99-lr_drop])
+                circle(0.5);
+            }
+            difference() {
+                translate([58.5, -0.51])
+                square(0.5);
+                translate([58.99, -0.52])
+                circle(0.5);
+            }
+            difference() {
+                translate([58.5, 0.49-lr_drop])
+                square(0.5);
+                translate([58.99, 0.99-lr_drop])
+                circle(0.5);
+            }
         }
-        difference() {
-            translate([4, 0.49-lr_drop])
-            square(0.5);
-            translate([4.01, 0.99-lr_drop])
-            circle(0.5);
-        }
-        difference() {
-            translate([58.5, -0.51])
-            square(0.5);
-            translate([58.99, -0.52])
-            circle(0.5);
-        }
-        difference() {
-            translate([58.5, 0.49-lr_drop])
-            square(0.5);
-            translate([58.99, 0.99-lr_drop])
-            circle(0.5);
+        
+        // holes for thread to hold wire
+        for(position = [7 : 10 : 37]) {
+            translate([position, 2-lr_drop, -0.1])
+            cylinder(h=10, d=0.8);
+            translate([position, 6-lr_drop, -0.1])
+            cylinder(h=10, d=0.8);
         }
     }
 
