@@ -241,9 +241,9 @@ module light_rail() {
     // rail
     difference() {
         linear_extrude(lightrail_depth + stud_height)
-        translate([-20, -lr_drop -lr_height])
+        translate([-23, -lr_drop -lr_height])
         offset(r=0.5)
-        square([128, lr_height]);
+        square([131, lr_height]);
 
         // create a slot for the led strip to go in
         translate([-19, -(lr_drop + lr_height / 2 + 5.6), front_thickness])
@@ -252,23 +252,30 @@ module light_rail() {
         square([126, 11.2]);
        
         // and a slot at the end to post the lights in and let wires out       
-        translate([-21, -(lr_drop + lr_height / 2 + 5.5), 2.5])
+        translate([-18, -(lr_drop + lr_height / 2 + 5.5), 2.5])
         linear_extrude(10)
         offset(r=0.5)
-        square([9, 11]);
+        square([9.04, 11]);
+        translate([-23.6, -(lr_drop + lr_height / 2 + 4), 2.5])
+        linear_extrude(10)
+        square([5.5, 8]);
+        for(position = [3.25 : 1.3 : 10])
+        translate([-23.6, -lr_drop - position, 2.8])
+        rotate([0,90,0])
+        cylinder(h=4.2, d=1.3);
         // with its fillets
-        translate([-20.2, -(lr_drop + lr_height / 2 + 6.3), 2.5])
+        translate([-23, -(lr_drop + lr_height / 2 + 4.5), 2.5])
         linear_extrude(10)
-        convex_fillet(size=0.3, rotation=90, practice=false);
-        translate([-20.2, -(lr_drop + 0.2), 2.5])
+        convex_fillet(size=0.5, rotation=90, practice=false);
+        translate([-23, -(lr_drop + lr_height / 2 - 4.5), 2.5])
         linear_extrude(10)
-        convex_fillet(size=0.3, rotation=180, practice=false);    
-        translate([-11.132, -(lr_drop + 0.505), 2.5])
+        convex_fillet(size=0.5, rotation=180, practice=false);    
+        translate([-19, -(lr_drop + lr_height / 2 + 4.5), 2.5])
         linear_extrude(10)
-        convex_fillet(size=0.5, rotation=190, x = 0.7, practice=false);   
-        translate([-11.132, -(lr_drop + lr_height - 0.505), 2.5])
+        convex_fillet(size=0.5, rotation=0, practice=false);   
+        translate([-19, -(lr_drop + lr_height / 2 - 4.5), 2.5])
         linear_extrude(10)
-        convex_fillet(size=0.5, rotation=80, x = 0.7, practice=false);    
+        convex_fillet(size=0.5, rotation=270, practice=false);      
         
         // and some windows for the lights
         for(position = [-14.5 : 6.93 : 105])
@@ -276,7 +283,7 @@ module light_rail() {
         cylinder(h=1, r=2.5);
         
         // chop out some bits so we don't need to bridge too much
-        for(position = [-26.96 : 20.79 : 76.99])
+        for(position = [-6.17 : 20.79 : 76.99])
         translate([position, -lr_drop -lr_height + 1.5, 2.5])
         linear_extrude(10)
         offset(r=0.5)
@@ -286,7 +293,6 @@ module light_rail() {
         offset(r=0.5)
         square([8.5, lr_height - 3]);
     }
-
 }
 
 module plug() {
