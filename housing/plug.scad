@@ -256,18 +256,33 @@ module light_rail() {
         linear_extrude(10)
         offset(r=0.5)
         square([9.04, 11]);
+        translate([-24, -(lr_drop + lr_height / 2 + 5.5), 2.5])
+        linear_extrude(10)
+        offset(r=0.5)
+        square([3, 11]);
         translate([-23.6, -(lr_drop + lr_height / 2 + 4), 2.5])
         linear_extrude(10)
         square([5.5, 8]);
+        // grip section
+        translate([-22, -lr_drop - 1.8, 0.5])
+        cylinder(h=10, d=1);        
+        translate([-22, -lr_drop + 1.8 - lr_height, 0.5])
+        cylinder(h=10, d=1);
         for(position = [3.25 : 1.3 : 10])
         translate([-23.6, -lr_drop - position, 2.8])
         rotate([0,90,0])
         cylinder(h=4.2, d=1.3);
         // with its fillets
-        translate([-23, -(lr_drop + lr_height / 2 + 4.5), 2.5])
+        translate([-23.2, -(lr_drop + lr_height) +0.2, 2.5])
+        linear_extrude(10)
+        convex_fillet(size=0.3, rotation=90, practice=false);
+        translate([-23.2, -(lr_drop) -0.2, 2.5])
+        linear_extrude(10)
+        convex_fillet(size=0.3, rotation=180, practice=false);   
+        translate([-20, -(lr_drop + lr_height / 2 + 4.5), 2.5])
         linear_extrude(10)
         convex_fillet(size=0.5, rotation=90, practice=false);
-        translate([-23, -(lr_drop + lr_height / 2 - 4.5), 2.5])
+        translate([-20, -(lr_drop + lr_height / 2 - 4.5), 2.5])
         linear_extrude(10)
         convex_fillet(size=0.5, rotation=180, practice=false);    
         translate([-19, -(lr_drop + lr_height / 2 + 4.5), 2.5])
@@ -293,13 +308,66 @@ module light_rail() {
         offset(r=0.5)
         square([8.5, lr_height - 3]);
     }
+    
+    difference() {
+        translate([-30, -(lr_drop + lr_height / 2 + 5.4)])
+        linear_extrude(1.3)
+        offset(r=0.5)
+        square([1.9, 10.8]);
+        translate([-29, -lr_drop - 1.8, -0.1])
+        cylinder(h=10, d=1);        
+        translate([-29, -lr_drop + 1.8 - lr_height, -0.1])
+        cylinder(h=10, d=1);
+        for(position = [3.25 : 1.3 : 10])
+        translate([-30.6, -lr_drop - position, 1.6])
+        rotate([0,90,0])
+        cylinder(h=4.2, d=1.3);
+    }
+
+        
 }
+
+
+
+module battery_clip() {
+    translate([-40, 0])
+    difference() { 
+        linear_extrude(16)   
+        offset(0.5)
+        square([12, 6]);
+                
+        translate([2, -1, -0.1])
+        linear_extrude(16.2)
+        offset(0.5)
+        square([4.15, 5]);
+               
+        translate([9.5, 9, 8])
+        rotate([90,0,0])
+        cylinder(h=10, d=3); 
+       
+        translate([9.5, 7, -0.1])
+        cylinder(h=16.2, d=3);
+     
+        translate([7.15, 0, -0.1])
+        linear_extrude(16.2)
+        convex_fillet(size=0.5, rotation=180, practice=false);   
+        translate([1, 0, -0.1])
+        linear_extrude(16.2)
+        convex_fillet(size=0.5, rotation=270, practice=false);     
+    }
+}
+
+
 
 module plug() {
     wedge();
     light_rail();
 }
 
-mirror([1, 0, 0])
-plug();
+
+
+mirror([1, 0, 0]) {
+    battery_clip();
+    plug();
+}
   
