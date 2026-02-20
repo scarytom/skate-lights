@@ -46,7 +46,7 @@ module wedge() {
     c6 = [50, 4];
 
     difference() {
-        linear_extrude(wedge_height)
+        linear_extrude(wedge_height + 2)
         difference() {
             // wedge
             offset(r=0.5) {
@@ -80,6 +80,18 @@ module wedge() {
             offset(r=0.5)
             square([7.5, 5.5]);
         }
+        
+            translate([1.8, 1.3, wedge_height])
+            linear_extrude(2.1)
+            offset(r=0.5) {
+                scale([0.85,0.85])
+                polygon(concat(
+                    bezier([0, 0], c1, c2, [15.2, 19.9]),
+                    bezier([15.2, 19.9], c3, c4, [29, 15]),
+               //     [[30, 40], [29, 40]],
+                    bezier([29, 15], c5, c6, [64, 0])
+                ));
+            }
         
         // board slot, which doesn't go all the way through
         translate([2.2, 1.5, board_chopout_z])
@@ -330,7 +342,7 @@ module light_rail() {
 
 
 module battery_clip() {
-    translate([-40, 0])
+    translate([80, 0])
     difference() { 
         linear_extrude(16)   
         offset(0.5)
@@ -366,8 +378,8 @@ module plug() {
 
 
 
-mirror([1, 0, 0]) {
+//mirror([1, 0, 0]) {
     battery_clip();
     plug();
-}
+//}
   
