@@ -247,12 +247,28 @@ module light_rail() {
         offset(r=0.5)
         square([126, 11.2]);
        
-        // and a slot at the end to post the lights in and let wires out       
+        // and a slot at the end to post the lights in      
         translate([-18, -(lr_drop + lr_height / 2 + 5.5), 2.5])
         linear_extrude(10)
         offset(r=0.5)
         square([9.04, 11]);
-        translate([-24, -(lr_drop + lr_height / 2 + 5.5), 2.5])
+        
+        // and one to let the wires to board
+        translate([-12.45, -(lr_drop + lr_height / 2), 2.599])
+        linear_extrude(10)
+        square([4, 11]);
+        translate([-12.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=270, practice=false);  
+        translate([-12.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=0, practice=false);  
+        translate([-7.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=90, practice=false);
+                
+        // and one to let the wires to the other side
+        translate([-24, -(lr_drop + lr_height / 2 + 5.5), 2])
         linear_extrude(10)
         offset(r=0.5)
         square([3, 11]);
