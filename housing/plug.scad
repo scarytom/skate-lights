@@ -33,8 +33,6 @@ module wedge() {
     wedge_height = plate_width / 2 + lightrail_depth + stud_height - plate_lip_width;
     board_chopout_z = 2.0;
     battery_connector_slot_x = 9.2;
-    wires_slot_x = 42;
-    wires_slot_width = 6;
     
     c1 = [2.5, 15.5];
     c2 = [11, 19.5];
@@ -71,9 +69,10 @@ module wedge() {
             square([28.5, 3.15]);
             
             // wires slot
-            translate([wires_slot_x, 2.65])
+            translate([41, 6])
+            rotate(-35)
             offset(r=0.5)
-            square([wires_slot_width, 1]);
+            square([4, 0.5]);
             
             // battery connector slot
             translate([battery_connector_slot_x, 2.65])
@@ -108,14 +107,6 @@ module wedge() {
         linear_extrude(wedge_height)
         offset(r=0.5)
         square([5, 0.2]);
-        
-        // wires slot fillets
-        translate([wires_slot_x - 1, 3.15, board_chopout_z])
-        linear_extrude(wedge_height)
-        convex_fillet(size=0.5, rotation=-90, practice=false);
-        translate([wires_slot_x - 1 + wires_slot_width + 2, 3.15, board_chopout_z])
-        linear_extrude(wedge_height)
-        convex_fillet(size=0.5, rotation=180, practice=false);
         
         // slim chip midway fillets
         translate([27 - 1 + 0.21, 2.95, board_chopout_z])
