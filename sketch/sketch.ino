@@ -104,7 +104,7 @@ void setup1(void) {
 
 void loop1() {
   if (readyToWrite) {
-    writeData();
+    // writeData();
   }
   delay(10000);
 }
@@ -212,11 +212,7 @@ void applyTheatreChase() {
     }
   }
 
-  if (pixelSet == 0) {
-    pixelSet = THEATRE_GAP - 1;
-  } else {
-    pixelSet = pixelSet - 1;
-  }
+  pixelSet = (pixelSet + 1) % THEATRE_GAP;
 }
 
 void solid(uint32_t colour) {
@@ -234,11 +230,7 @@ void rainbow() {
     strip.setPixelColor(pixelIdx, calculateRainbowColour(pixelIdx * RAINBOW_STEP + cyclePosition));
   }
 
-  if (cyclePosition < RAINBOW_STEP) {
-    cyclePosition = RAINBOW_STATES - RAINBOW_STEP;
-  } else {
-    cyclePosition = cyclePosition - RAINBOW_STEP;
-  }
+  cyclePosition = (cyclePosition + RAINBOW_STEP) % RAINBOW_STATES;
 }
 
 uint32_t calculateRainbowColour(uint16_t position) {
