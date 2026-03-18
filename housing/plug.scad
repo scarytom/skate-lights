@@ -233,14 +233,7 @@ module light_rail() {
 
     front_thickness = 0.5;
     led_strip_thickness = 2.1;
-
-    //stilts
-    for(position = [-7.96 : 20.79 : 95.99])
-    translate([position, -lr_drop -lr_height/2, 0])
-    linear_extrude(front_thickness + led_strip_thickness - 0.1)
-    offset(0.5)
-    square([0.79, 0.1]);
-        
+       
     // rail
     difference() {
         linear_extrude(lightrail_depth + stud_height)
