@@ -223,11 +223,11 @@ module light_rail() {
         }
         
         // holes for thread to hold wire
-        for(position = [7 : 10 : 37]) {
+        for(position = [7 : 10 : 17]) {
             translate([position, 2-lr_drop, -0.1])
-            cylinder(h=10, d=0.8);
+            cylinder(h=10, d=1);
             translate([position, 6-lr_drop, -0.1])
-            cylinder(h=10, d=0.8);
+            cylinder(h=10, d=1);
         }
     }
 
