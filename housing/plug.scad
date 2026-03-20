@@ -27,7 +27,7 @@ lightrail_depth = 3;
 stud_height = 1;
 
 
-module wedge() {
+module wedge(right=false) {
     plate_width = 3.5;
     plate_lip_width = 0.5;
     wedge_height = plate_width / 2 + lightrail_depth + stud_height - plate_lip_width;
@@ -67,65 +67,90 @@ module wedge() {
             rotate(-16.5)         // ->16
             offset(r=1) 
             square([28.5, 3.15]);
-            
-            // wires slot
-            translate([41, 6])
-            rotate(-35)
-            offset(r=0.5)
-            square([4, 0.5]);
-            
-            // battery connector slot
-            translate([battery_connector_slot_x, 2.65])
-            offset(r=0.5)
-            square([7.5, 5.5]);
+
+            if (right) {
+                // wires slot
+                translate([41, 6])
+                rotate(-35)
+                offset(r=0.5)
+                square([4, 0.5]);
+                
+                // buttons access slot
+                translate([10, 4.5])
+                offset(r=0.5)
+                square([7.5, 3]);
+            } else {
+                // battery connector slot
+                translate([battery_connector_slot_x, 2.65])
+                offset(r=0.5)
+                square([7.5, 5.5]);
+            }
         }
         
-            translate([1.8, 1.3, wedge_height])
-            linear_extrude(2.1)
-            offset(r=0.5) {
-                scale([0.85,0.85])
-                polygon(concat(
-                    bezier([0, 0], c1, c2, [15.2, 19.9]),
-                    bezier([15.2, 19.9], c3, c4, [29, 15]),
-               //     [[30, 40], [29, 40]],
-                    bezier([29, 15], c5, c6, [64, 0])
-                ));
-            }
+        translate([1.8, 1.3, wedge_height])
+        linear_extrude(2.1)
+        offset(r=0.5) {
+            scale([0.85,0.85])
+            polygon(concat(
+                bezier([0, 0], c1, c2, [15.2, 19.9]),
+                bezier([15.2, 19.9], c3, c4, [29, 15]),
+           //     [[30, 40], [29, 40]],
+                bezier([29, 15], c5, c6, [64, 0])
+            ));
+        }
         
         // board slot, which doesn't go all the way through
         translate([2.2, 1.5, board_chopout_z])
         linear_extrude(wedge_height)
         offset(r=0.5)
         square([51, 0.65]);
-        // little chip next to battery connector slot
-        translate([battery_connector_slot_x - 2, 2.65, board_chopout_z])
-        linear_extrude(wedge_height)
-        offset(r=0.5)
-        square([1.5, 0.5]);
-        // slim chip midway along board on battery connector side
-        translate([27, 2.65, board_chopout_z])
-        linear_extrude(wedge_height)
-        offset(r=0.5)
-        square([5, 0.2]);
-        
-        // slim chip midway fillets
-        translate([27 - 1 + 0.21, 2.95, board_chopout_z])
-        linear_extrude(wedge_height)
-        convex_fillet(size=0.3, rotation=-90, practice=false);
-        translate([27 - 1 + 5 + 1.79, 2.95, board_chopout_z])
-        linear_extrude(wedge_height)
-        convex_fillet(size=0.3, rotation=180, practice=false);
-        
-        // battery connector slot fillets
-        translate([battery_connector_slot_x - 1 - 2, 3.15, board_chopout_z])
-        linear_extrude(wedge_height)
-        convex_fillet(size=0.5, rotation=-90, practice=false);
-        translate([battery_connector_slot_x - 1, 4.15, board_chopout_z])
-        linear_extrude(wedge_height)
-        convex_fillet(size=0.5, rotation=-90, practice=false);
-        translate([battery_connector_slot_x - 1 + 7.5 + 2, 3.15, board_chopout_z])
-        linear_extrude(wedge_height)
-        convex_fillet(size=0.5, rotation=180, practice=false);
+
+        if (!right) {
+            // little chip next to battery connector slot
+            translate([battery_connector_slot_x - 2, 2.65, board_chopout_z])
+            linear_extrude(wedge_height)
+            offset(r=0.5)
+            square([1.5, 0.5]);
+
+            // slim chip midway along board on battery connector side
+            translate([27, 2.65, board_chopout_z])
+            linear_extrude(wedge_height)
+            offset(r=0.5)
+            square([5, 0.2]);
+            // and its fillets
+            translate([27 - 1 + 0.21, 2.95, board_chopout_z])
+            linear_extrude(wedge_height)
+            convex_fillet(size=0.3, rotation=-90, practice=false);
+            translate([27 - 1 + 5 + 1.79, 2.95, board_chopout_z])
+            linear_extrude(wedge_height)
+            convex_fillet(size=0.3, rotation=180, practice=false);
+            
+            // chip near end of board
+            translate([42.5, 2.65, board_chopout_z])
+            linear_extrude(wedge_height)
+            offset(r=0.5)
+            square([2, 1]);
+            // and its fillets
+            translate([42.5 - 1 + 0.21, 2.95, board_chopout_z])
+            linear_extrude(wedge_height)
+            convex_fillet(size=0.3, rotation=-90, practice=false);
+            translate([42.5 - 1 + 2 + 1.79, 2.95, board_chopout_z])
+            linear_extrude(wedge_height)
+            convex_fillet(size=0.3, rotation=180, practice=false);
+            
+            // battery connector slot fillets
+            translate([battery_connector_slot_x - 1 - 2, 3.15, board_chopout_z])
+            linear_extrude(wedge_height)
+            convex_fillet(size=0.5, rotation=-90, practice=false);
+
+            translate([battery_connector_slot_x - 1 + 7.5 + 2, 3.15, board_chopout_z])
+            linear_extrude(wedge_height)
+            convex_fillet(size=0.5, rotation=180, practice=false);
+
+            translate([battery_connector_slot_x - 1, 4.15, board_chopout_z])
+            linear_extrude(wedge_height)
+            convex_fillet(size=0.5, rotation=-90, practice=false);
+        }
     }
     
 
@@ -185,7 +210,7 @@ module wedge() {
 }
 
 
-module light_rail() {
+module light_rail(right=false) {
     lr_drop = 9.5;
     lr_height = 13;
     
@@ -222,12 +247,14 @@ module light_rail() {
             }
         }
         
-        // holes for thread to hold wire
-        for(position = [7 : 10 : 17]) {
-            translate([position, 2-lr_drop, -0.1])
-            cylinder(h=10, d=1);
-            translate([position, 6-lr_drop, -0.1])
-            cylinder(h=10, d=1);
+        if (right) {
+            // holes for thread to hold wire
+            for(position = [7 : 10 : 17]) {
+                translate([position, 2-lr_drop, -0.1])
+                cylinder(h=10, d=1);
+                translate([position, 6-lr_drop, -0.1])
+                cylinder(h=10, d=1);
+            }
         }
     }
 
@@ -253,19 +280,21 @@ module light_rail() {
         offset(r=0.5)
         square([9.04, 11]);
         
-        // and one to let the wires to board
-        translate([-12.45, -(lr_drop + lr_height / 2), 2.599])
-        linear_extrude(10)
-        square([4, 11]);
-        translate([-12.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
-        linear_extrude(10)
-        convex_fillet(size=0.5, rotation=270, practice=false);  
-        translate([-12.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
-        linear_extrude(10)
-        convex_fillet(size=0.5, rotation=0, practice=false);  
-        translate([-7.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
-        linear_extrude(10)
-        convex_fillet(size=0.5, rotation=90, practice=false);
+        if (right) {
+            // and one to let the wires to board
+            translate([-12.45, -(lr_drop + lr_height / 2), 2.599])
+            linear_extrude(10)
+            square([4, 11]);
+            translate([-12.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
+            linear_extrude(10)
+            convex_fillet(size=0.5, rotation=270, practice=false);
+            translate([-12.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
+            linear_extrude(10)
+            convex_fillet(size=0.5, rotation=0, practice=false);
+            translate([-7.95, -(lr_drop + lr_height / 2 - 6.5), 2.599])
+            linear_extrude(10)
+            convex_fillet(size=0.5, rotation=90, practice=false);
+        }
                 
         // and one to let the wires to the other side
         translate([-24, -(lr_drop + lr_height / 2 + 5.5), 2])
@@ -374,15 +403,16 @@ module battery_clip() {
 
 
 
-module plug() {
-    wedge();
-    light_rail();
+module plug(right=false) {
+    mirror([right ? 1 : 0, 0, 0])
+    translate([right ? -80 : 0, right ? 50 : 0, 0]) {
+        wedge(right);
+        light_rail(right);
+        battery_clip();
+    }
 }
 
+plug(right=false);
+plug(right=true);
 
-
-//mirror([1, 0, 0]) {
-    battery_clip();
-    plug();
-//}
   
