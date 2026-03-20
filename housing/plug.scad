@@ -272,29 +272,24 @@ module light_rail() {
         linear_extrude(10)
         offset(r=0.5)
         square([3, 11]);
-        translate([-23.6, -(lr_drop + lr_height / 2 + 4), 2.5])
+        translate([-23.6, -(lr_drop + lr_height / 2 + 4), 2.599])
         linear_extrude(10)
         square([5.5, 8]);
         // grip section
-        translate([-22, -lr_drop - 1.8, 0.5])
-        cylinder(h=10, d=1);        
-        translate([-22, -lr_drop + 1.8 - lr_height, 0.5])
-        cylinder(h=10, d=1);
-        for(position = [3.25 : 1.3 : 10])
-        translate([-23.6, -lr_drop - position, 2.8])
-        rotate([0,90,0])
-        cylinder(h=4.2, d=1.3);
+        translate([-23.6, -lr_drop - 9.75, 1.3])
+        linear_extrude(10)
+        square([5.5, 6.5]);
         // with its fillets
-        translate([-23.2, -(lr_drop + lr_height) +0.2, 2.5])
+        translate([-23.2, -(lr_drop + lr_height) +0.2, 2])
         linear_extrude(10)
         convex_fillet(size=0.3, rotation=90, practice=false);
-        translate([-23.2, -(lr_drop) -0.2, 2.5])
+        translate([-23.2, -(lr_drop) -0.2, 2])
         linear_extrude(10)
         convex_fillet(size=0.3, rotation=180, practice=false);   
-        translate([-20, -(lr_drop + lr_height / 2 + 4.5), 2.5])
+        translate([-20, -(lr_drop + lr_height / 2 + 4.5), 2.599])
         linear_extrude(10)
         convex_fillet(size=0.5, rotation=90, practice=false);
-        translate([-20, -(lr_drop + lr_height / 2 - 4.5), 2.5])
+        translate([-20, -(lr_drop + lr_height / 2 - 4.5), 2.599])
         linear_extrude(10)
         convex_fillet(size=0.5, rotation=180, practice=false);    
         translate([-19, -(lr_drop + lr_height / 2 + 4.5), 2.5])
@@ -302,7 +297,25 @@ module light_rail() {
         convex_fillet(size=0.5, rotation=0, practice=false);   
         translate([-19, -(lr_drop + lr_height / 2 - 4.5), 2.5])
         linear_extrude(10)
-        convex_fillet(size=0.5, rotation=270, practice=false);      
+        convex_fillet(size=0.5, rotation=270, practice=false);
+        translate([-20, -(lr_drop + lr_height / 2 + 3.75), 2])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=90, practice=false);
+        translate([-20, -(lr_drop + lr_height / 2 - 3.75), 2])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=180, practice=false);
+        translate([-23, -(lr_drop + lr_height / 2 + 3.75), 1.3])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=90, practice=false);
+        translate([-23, -(lr_drop + lr_height / 2 - 3.75), 1.3])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=180, practice=false); 
+        translate([-20, -(lr_drop + lr_height / 2 + 3.75), 1.3])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=0, practice=false);  
+        translate([-20, -(lr_drop + lr_height / 2 - 3.75), 1.3])
+        linear_extrude(10)
+        convex_fillet(size=0.5, rotation=270, practice=false);  
         
         // and some windows for the lights
         for(position = [-14.5 : 6.93 : 105])
@@ -320,23 +333,13 @@ module light_rail() {
         offset(r=0.5)
         square([8.5, lr_height - 3]);
     }
-    
-    difference() {
-        translate([-30, -(lr_drop + lr_height / 2 + 5.4)])
-        linear_extrude(1.3)
-        offset(r=0.5)
-        square([1.9, 10.8]);
-        translate([-29, -lr_drop - 1.8, -0.1])
-        cylinder(h=10, d=1);        
-        translate([-29, -lr_drop + 1.8 - lr_height, -0.1])
-        cylinder(h=10, d=1);
-        for(position = [3.25 : 1.3 : 10])
-        translate([-30.6, -lr_drop - position, 1.6])
-        rotate([0,90,0])
-        cylinder(h=4.2, d=1.3);
-    }
 
-        
+    // wire clamp
+    x = -30;
+    translate([x, -(lr_drop + lr_height / 2 + 5.4)])
+    linear_extrude(1.8)
+    offset(r=0.5)
+    square([1.9, 10.8]);
 }
 
 
