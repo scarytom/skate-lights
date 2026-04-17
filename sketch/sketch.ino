@@ -22,7 +22,7 @@ int dataSampleIntervalMillis = 100;  // how many millis between data samples
 float average_acceleration = 0.0;
 
 bool sleepMode = false;
-#define MODE_COUNT 7;
+#define MODE_COUNT 7
 uint8_t mode = 0;
 
 void setup() {
