@@ -6,7 +6,6 @@
 #define SAMPLE_FILE "samples6.csv"
 #define SAMPLE_BUFFER_SIZE 600
 uint8_t activeBufferIdx = 0;
-bool readyToWrite = false;
 float samples[2][SAMPLE_BUFFER_SIZE][3];
 
 #define I2C_ADDRESS 0x18
@@ -103,10 +102,8 @@ void setup1(void) {
 }
 
 void loop1() {
-  if (readyToWrite) {
-    // writeData();
-  }
-  delay(10000);
+  uint32_t bufferIdx = rp2040.fifo.pop();
+//   writeData(bufferIdx);
 }
 
 void applyMode() {
@@ -166,9 +163,10 @@ void sampleData() {
 
   if (sampleIdx == SAMPLE_BUFFER_SIZE) {
     Serial.println("switching sample buffer");
+    uint8_t fullBufferIdx = activeBufferIdx;
     activeBufferIdx = (activeBufferIdx + 1) % 2;
     sampleIdx = 0;
-    readyToWrite = true;
+    rp2040.fifo.push(fullBufferIdx);
   }
 
   updateRollingAverage(event.acceleration.x, event.acceleration.y, event.acceleration.z);
@@ -190,9 +188,8 @@ void updateRollingAverage(float x, float y, float z) {
   average_acceleration = (average_acceleration * 10.0 - out_magnitude + in_magnitude) / 10.0;
 }
 
-void writeData() {
+void writeData(uint8_t bufferIdx) {
   Serial.println("writing data to flash");
-  uint8_t bufferIdx = (activeBufferIdx + 1) % 2;
   noInterrupts();
   File f = LittleFS.open(SAMPLE_FILE, "a");
   for(uint16_t idx = 0; idx < SAMPLE_BUFFER_SIZE; idx++) {
@@ -200,7 +197,6 @@ void writeData() {
   }
   f.close();
   interrupts();
-  readyToWrite = false;
 }
 
 #define THEATRE_GAP 4
