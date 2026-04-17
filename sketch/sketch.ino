@@ -5,7 +5,7 @@
 
 #define SAMPLE_FILE "samples6.csv"
 #define SAMPLE_BUFFER_SIZE 600
-uint8_t activeBufferIdx = 0;
+uint8_t active_buffer_idx = 0;
 float samples[2][SAMPLE_BUFFER_SIZE][3];
 
 #define I2C_ADDRESS 0x18
@@ -14,9 +14,7 @@ Adafruit_LIS3DH lis = Adafruit_LIS3DH();
 #define LED_COUNT 18
 Adafruit_NeoPixel strip(LED_COUNT, PIN_EXTERNAL_NEOPIXELS, NEO_GRB + NEO_KHZ800);
 
-// these might be modified during program execution
-int pixelChangeIntervalMillis = 50;  // how many millis between pixel changes
-int dataSampleIntervalMillis = 100;  // how many millis between data samples
+#define DATA_SAMPLE_INTERVAL_MILLIS 100
 
 float average_acceleration = 0.0;
 float previous_magnitude = 9.81;
@@ -36,8 +34,8 @@ float tilt_y = 0.0;  // smoothed Y axis
 #define STATE_ACTIVE  2
 #define STATE_INTENSE 3
 uint8_t motion_state = STATE_STILL;
+const int pixel_interval_by_state[] = {200, 80, 40, 20};
 
-bool sleepMode = false;
 #define MODE_COUNT 7
 uint8_t mode = 0;
 
@@ -68,52 +66,48 @@ void setup() {
 }
 
 void loop() {
-  static bool buttonStateHandled = false;
-  static PinStatus previousButtonState = HIGH;
-  static unsigned long previousButtonChangeTime = 0; // when did the button last change state
-  static unsigned long previousPixelChangeTime  = 0; // when did we last change a pixel
-  static unsigned long previousDataSampleTime   = 0; // when did we last sample data
+  static bool button_state_handled = false;
+  static PinStatus previous_button_state = HIGH;
+  static unsigned long previous_button_change_time = 0; // when did the button last change state
+  static unsigned long previous_pixel_change_time  = 0; // when did we last change a pixel
+  static unsigned long previous_data_sample_time   = 0; // when did we last sample data
 
-  unsigned long currentTime = millis();
+  unsigned long current_time = millis();
 
-  PinStatus buttonState = digitalRead(PIN_BUTTON);
-  if (buttonState != previousButtonState) {
-    previousButtonState = buttonState;
-    previousButtonChangeTime = currentTime;
-    buttonStateHandled = false;
+  PinStatus button_state = digitalRead(PIN_BUTTON);
+  if (button_state != previous_button_state) {
+    previous_button_state = button_state;
+    previous_button_change_time = current_time;
+    button_state_handled = false;
   }
 
-  if (buttonState == LOW && !buttonStateHandled && currentTime - previousButtonChangeTime > 50) {
-    buttonStateHandled = true;
+  if (button_state == LOW && !button_state_handled && current_time - previous_button_change_time > 50) {
+    button_state_handled = true;
     mode = (mode + 1) % MODE_COUNT;
     applyMode();
   }
 
   if (mode == 0) return;
 
-  if (currentTime - previousPixelChangeTime > pixelChangeIntervalMillis) {
+  if (current_time - previous_pixel_change_time > pixel_interval_by_state[motion_state]) {
     changePixel();
-    previousPixelChangeTime = currentTime;
+    previous_pixel_change_time = current_time;
   }
 
-  if (currentTime - previousDataSampleTime > dataSampleIntervalMillis) {
+  if (current_time - previous_data_sample_time > DATA_SAMPLE_INTERVAL_MILLIS) {
     sampleData();
-    previousDataSampleTime = currentTime;
+    previous_data_sample_time = current_time;
 
     // Data-driven thresholds (from analysis of 142k samples):
     // rolling avg p50≈0.5-1.8, p90≈2.5-3.2, p95≈3.3-3.6, max≈7.5
     if (average_acceleration > 3.5) {
       motion_state = STATE_INTENSE;
-      pixelChangeIntervalMillis = 20;
     } else if (average_acceleration > 2.0) {
       motion_state = STATE_ACTIVE;
-      pixelChangeIntervalMillis = 40;
     } else if (average_acceleration > 0.5) {
       motion_state = STATE_CRUISE;
-      pixelChangeIntervalMillis = 80;
     } else {
       motion_state = STATE_STILL;
-      pixelChangeIntervalMillis = 200;
     }
   }
 }
@@ -123,8 +117,8 @@ void setup1(void) {
 }
 
 void loop1() {
-  uint32_t bufferIdx = rp2040.fifo.pop();
-//   writeData(bufferIdx);
+  uint32_t buffer_idx = rp2040.fifo.pop();
+//   writeData(buffer_idx);
 }
 
 void applyMode() {
@@ -182,22 +176,22 @@ void changePixel() {
 }
 
 void sampleData() {
-  static uint16_t sampleIdx = 0;
+  static uint16_t sample_idx = 0;
 
   sensors_event_t event;
   lis.getEvent(&event);
-  samples[activeBufferIdx][sampleIdx][0] = event.acceleration.x;
-  samples[activeBufferIdx][sampleIdx][1] = event.acceleration.y;
-  samples[activeBufferIdx][sampleIdx][2] = event.acceleration.z;
+  samples[active_buffer_idx][sample_idx][0] = event.acceleration.x;
+  samples[active_buffer_idx][sample_idx][1] = event.acceleration.y;
+  samples[active_buffer_idx][sample_idx][2] = event.acceleration.z;
 
-  sampleIdx++;
+  sample_idx++;
 
-  if (sampleIdx == SAMPLE_BUFFER_SIZE) {
+  if (sample_idx == SAMPLE_BUFFER_SIZE) {
     Serial.println("switching sample buffer");
-    uint8_t fullBufferIdx = activeBufferIdx;
-    activeBufferIdx = (activeBufferIdx + 1) % 2;
-    sampleIdx = 0;
-    rp2040.fifo.push(fullBufferIdx);
+    uint8_t full_buffer_idx = active_buffer_idx;
+    active_buffer_idx = (active_buffer_idx + 1) % 2;
+    sample_idx = 0;
+    rp2040.fifo.push(full_buffer_idx);
   }
 
   float x = event.acceleration.x;
@@ -235,12 +229,12 @@ void updateRollingAverage(float x, float y, float z) {
   average_acceleration = (average_acceleration * 10.0 - out_magnitude + in_magnitude) / 10.0;
 }
 
-void writeData(uint8_t bufferIdx) {
+void writeData(uint8_t buffer_idx) {
   Serial.println("writing data to flash");
   noInterrupts();
   File f = LittleFS.open(SAMPLE_FILE, "a");
   for(uint16_t idx = 0; idx < SAMPLE_BUFFER_SIZE; idx++) {
-    f.printf("%f,%f,%f\n", samples[bufferIdx][idx][0], samples[bufferIdx][idx][1], samples[bufferIdx][idx][2]);
+    f.printf("%f,%f,%f\n", samples[buffer_idx][idx][0], samples[buffer_idx][idx][1], samples[buffer_idx][idx][2]);
   }
   f.close();
   interrupts();
@@ -262,13 +256,13 @@ void impactFlash() {
 
 // --- Motion-reactive pulse: color and speed driven by acceleration ---
 void motionPulse() {
-  static uint8_t pulsePhase = 0;
+  static uint8_t pulse_phase = 0;
 
   // Pulse brightness oscillates; speed depends on motion state
-  uint8_t pulseStep = 3 + motion_state * 5;  // still=3, cruise=8, active=13, intense=18
-  pulsePhase += pulseStep;
+  uint8_t pulse_step = 3 + motion_state * 5;  // still=3, cruise=8, active=13, intense=18
+  pulse_phase += pulse_step;
   // Triangle wave: 0→255→0
-  uint8_t brightness = pulsePhase < 128 ? pulsePhase * 2 : (255 - pulsePhase) * 2;
+  uint8_t brightness = pulse_phase < 128 ? pulse_phase * 2 : (255 - pulse_phase) * 2;
 
   // Color shifts with motion state
   uint32_t color;
@@ -300,63 +294,63 @@ void motionPulse() {
 
 #define THEATRE_GAP 4
 void applyTheatreChase() {
-  static uint8_t pixelSet = 0;
-  for(uint16_t pixelIdx = 0; pixelIdx < LED_COUNT; pixelIdx++) {
-    if ((pixelIdx + pixelSet) % THEATRE_GAP != 0) {
-      strip.setPixelColor(pixelIdx, strip.Color(0, 0, 0));
+  static uint8_t pixel_set = 0;
+  for(uint16_t pixel_idx = 0; pixel_idx < LED_COUNT; pixel_idx++) {
+    if ((pixel_idx + pixel_set) % THEATRE_GAP != 0) {
+      strip.setPixelColor(pixel_idx, strip.Color(0, 0, 0));
     }
   }
 
-  pixelSet = (pixelSet + 1) % THEATRE_GAP;
+  pixel_set = (pixel_set + 1) % THEATRE_GAP;
 }
 
 void solid(uint32_t colour) {
-  for(uint16_t pixelIdx = 0; pixelIdx < LED_COUNT; pixelIdx++) {
-    strip.setPixelColor(pixelIdx, colour);
+  for(uint16_t pixel_idx = 0; pixel_idx < LED_COUNT; pixel_idx++) {
+    strip.setPixelColor(pixel_idx, colour);
   }
 }
 
 #define RAINBOW_STATES 765 // 255 states * 3 colours
 #define RAINBOW_STEP 5
 void rainbow() {
-  static uint16_t cyclePosition = 0;
+  static uint16_t cycle_position = 0;
 
-  for(uint16_t pixelIdx = 0; pixelIdx < LED_COUNT; pixelIdx++) {
-    strip.setPixelColor(pixelIdx, calculateRainbowColour(pixelIdx * RAINBOW_STEP + cyclePosition));
+  for(uint16_t pixel_idx = 0; pixel_idx < LED_COUNT; pixel_idx++) {
+    strip.setPixelColor(pixel_idx, calculateRainbowColour(pixel_idx * RAINBOW_STEP + cycle_position));
   }
 
-  cyclePosition = (cyclePosition + RAINBOW_STEP) % RAINBOW_STATES;
+  cycle_position = (cycle_position + RAINBOW_STEP) % RAINBOW_STATES;
 }
 
 // --- Tilt-reactive rainbow: board tilt shifts the hue offset ---
 void tiltRainbow() {
-  static uint16_t cyclePosition = 0;
+  static uint16_t cycle_position = 0;
 
   // Map tilt_x (-20..+20) to a hue offset (0..RAINBOW_STATES)
   // This makes the rainbow "slide" along the strip as you lean
-  int16_t tiltOffset = (int16_t)(tilt_x * 19);  // ~±380 range from ±20
+  int16_t tilt_offset = (int16_t)(tilt_x * 19);  // ~±380 range from ±20
 
   // Speed scales with motion state
   uint16_t step = 2 + motion_state * 3;  // still=2, cruise=5, active=8, intense=11
 
   for (uint16_t i = 0; i < LED_COUNT; i++) {
-    uint16_t pos = (i * 5 + cyclePosition + tiltOffset + RAINBOW_STATES) % RAINBOW_STATES;
+    uint16_t pos = (i * 5 + cycle_position + tilt_offset + RAINBOW_STATES) % RAINBOW_STATES;
     strip.setPixelColor(i, calculateRainbowColour(pos));
   }
 
-  cyclePosition = (cyclePosition + step) % RAINBOW_STATES;
+  cycle_position = (cycle_position + step) % RAINBOW_STATES;
 }
 
 uint32_t calculateRainbowColour(uint16_t position) {
   uint8_t phase = (position % RAINBOW_STATES) / 255; // 0=RG; 1=GB; 2=RB
-  uint8_t increasingComponent = position % 255;
-  uint8_t decreasingComponent = 255 - increasingComponent;
+  uint8_t increasing_component = position % 255;
+  uint8_t decreasing_component = 255 - increasing_component;
 
   if (phase == 0) {
-    return strip.Color(decreasingComponent, increasingComponent, 0);
+    return strip.Color(decreasing_component, increasing_component, 0);
   }
   if (phase == 1) {
-    return strip.Color(0, decreasingComponent, increasingComponent);
+    return strip.Color(0, decreasing_component, increasing_component);
   }
-  return strip.Color(increasingComponent, 0, decreasingComponent);
+  return strip.Color(increasing_component, 0, decreasing_component);
 }
