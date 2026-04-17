@@ -176,7 +176,7 @@ void sampleData() {
 
 void updateRollingAverage(float x, float y, float z) {
   static uint8_t idx = 0;
-  static float buffer[10];
+  static float buffer[10] = {0};
 
   float in_magnitude = abs(sqrt(x * x + y * y + z * z) - 9.81);
   float out_magnitude = buffer[idx];
